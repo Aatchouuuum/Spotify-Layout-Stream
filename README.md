@@ -54,7 +54,7 @@ The setup finish here, now you need to run it
 
 There is two ways for running this app.
 
-### Using the interface [Easy way]
+### Using the interface [Easy way] [Need a Rework 'cause doesn't work w/ windows]
 
 
 > **For this part you need [python3](https://www.python.org/downloads/).**
