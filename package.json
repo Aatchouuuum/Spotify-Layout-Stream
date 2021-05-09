@@ -1,0 +1,19 @@
+{
+  "name": "layoutspotify",
+  "version": "1.0.0",
+  "description": "Layout de stream pour spotiffy",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "author": "aatchouuuum",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "request": "^2.88.2",
+    "spotify-web-api-node": "^5.0.0"
+  }
+}

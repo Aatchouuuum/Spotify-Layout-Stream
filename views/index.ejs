@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Spotify Layout</title>
+    </head>
+
+    <style>
+        @import url(https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css);
+        @import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+        @import url(https://fonts.googleapis.com/css?family=Lato:300,400,700);
+        @import url(https://unpkg.com/ionicons@4.1.1/dist/css/ionicons.min.css);
+        
+        body{
+            font-family: 'IconicFill', sans-serif;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        #link{
+            color: white;
+            background-color: #1db954;
+            padding: 10px 20px;
+            border-radius: 9999px;
+            text-decoration: none;
+
+        }
+        small{
+            margin-top: 15px;
+        }
+    </style>
+
+    <body>
+        <h1>Spotify stream layout</h1>
+        <a href="/login" id="link">Log in with Spotify</a>
+        <small>Made with ❤️ by Aatchouuuum</small>
+    </body>
+    <script>
+        sleep(3000).then( ()=>{
+            document.getElementById('link').click()
+        })
+
+        //FCT
+        function sleep (time) {
+            return new Promise((resolve) => setTimeout(resolve, time));
+        }
+    </script>
+</html>

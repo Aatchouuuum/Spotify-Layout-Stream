@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="css/layout.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout</title>
+</head>
+<body>
+
+    
+<div id="MainApp">
+    <transition name="slide-fade">
+        <div id="app" v-if="isPlaying">
+
+
+            <transition name="bounce" mode="out-in">
+                <img :src="img" :key="img">
+            </transition>
+
+
+            <div id="stuff" :style="`--data-background-image: url(${img})`">
+                <div id="rigthStuff">
+                    <transition name="fade" mode="out-in">
+                        <div id="info" :key="title">
+                            <div id="title" class="info-val">
+                                <h1 ite="10000"><span>{{title}}</span></h1>
+                            </div>
+                    
+                            <div id="artist" class="info-val">
+                                <h1 ite="10000"><span>{{artists}}</span></h1>
+                            </div>
+                        </div>
+                    </transition>
+            
+                    <div id="timeProgress">
+                        <span>{{prog}}/{{totTime}}</span>
+                    </div>
+            
+                    <div id="Progress">
+                        <div id="timeBar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script>
+    const REQUEST_RATE = 1 // in secondes
+
+    var globData = {
+        isPlaying:false,
+        toggle : true,
+        title : null,
+        img : null,
+        artists : null,
+        prog : 0,
+        totTime : 0
+    }
+
+    var app = new Vue({
+        el: '#MainApp',
+        data: globData
+    })
+
+    document.getElementById('MainApp').style.display = 'flex';
+
+    sleep(1000).then(()=>{
+        getData(globData.isPlaying)
+    })
+
+    sleep(5000).then(() =>{ //lunch refresh token
+        refreshToken()
+    }) 
+    
+
+    //FCT
+    function sleep (time) {
+        return new Promise((resolve) => setTimeout(resolve, time));
+    }
+
+    function millisToMinutesAndSeconds(millis) {
+        var minutes = Math.floor(millis / 60000);
+        var seconds = ((millis % 60000) / 1000).toFixed(0);
+        return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+    }
+
+    
+
+    function getData(prevIsPlaying){
+        $.post("/actuData",
+            {},
+            (data, status) => {
+                if(status =="success"){
+                    if(data.error) getData(globData.isPlaying)
+                    else{
+                        let change = false //Don't lunch 2 times the anim if song change
+
+                        //console.log(data);
+                        if(globData.title != data.title){
+                            change = true
+                            globData.isPlaying = data.isPlaying
+                            globData.title = data.title
+                            globData.img = data.img
+                            globData.artists = data.artists
+                            //lunch animation text scrolling
+                            sleep(2000).then(()=>{
+                                $(function () {$('#title h1').scrolltxt(25);}); //lunch scroll 
+                                $(function () {$('#artist h1').scrolltxt(24);}); //lunch scroll
+                            })
+                        }
+                        if(data.prog && data.totTime){
+                            globData.prog = millisToMinutesAndSeconds(data.prog)
+                            globData.totTime = millisToMinutesAndSeconds(data.totTime)
+                            try{document.getElementById('timeBar').style.width=(data.prog/data.totTime)*355 + 'px'}catch{}
+                        }
+                        
+                        
+                        if(globData.isPlaying && !prevIsPlaying && !change){
+                            //lunch animation text scrolling
+                            sleep(2000).then(()=>{
+                                $(function () {$('#title h1').scrolltxt(25);}); //lunch scroll 
+                                $(function () {$('#artist h1').scrolltxt(24);}); //lunch scroll
+                            })
+                        }
+
+                        sleep(REQUEST_RATE * 1000).then(() => {
+                            getData(globData.isPlaying)
+                        })
+                    }
+                }
+            }
+        )
+    }
+
+    function refreshToken(){
+        //refresh token eatch 45 min
+        $.post("/refresh_token",
+            {},
+            (data, status) => {
+                if(status =="success"){
+                    if (data.token_refresh == "ok"){
+                        sleep(60000*45).then( () => {
+                            refreshToken()
+                        })
+                    }else{
+                        sleep(1000).then(() => {
+                            refreshToken()
+                        })
+                    }
+                }
+            }
+        )
+    }
+
+
+    //scroll anim
+    $.fn.scrolltxt = function (speedArg) {
+
+        return this.each(function () {
+            var options = $.extend({
+                speed: speedArg
+            }, arguments[0] || {});
+
+            var el = $(this);
+            // console.log(el.find('span').width(), el.parent().width());
+            var timeWait = 500
+            var lastVal = el.find('span').text()
+            
+            var scroll_text = setInterval(function () {
+                    scrollText();
+                }, options.speed);
+
+            var scrollText = function () {
+                if( el.find('span').width()==0 || el.parent().width()==0) clearInterval(scroll_text) 
+                if (el.find('span').width() > el.parent().width()) {
+                    if(el.position().left==0){
+                        if(timeWait !=0) timeWait = timeWait-1
+                        else{
+                            timeWait=500
+                            var width = el.find('span').width(),
+                            left = el.position().left - 1;
+                            left = -left > width ? el.width() : left;
+
+                            el.css({
+                                left: left
+                            });
+                        }
+                    }else{
+                        var width = el.find('span').width(),
+                        left = el.position().left - 1;
+                        left = -left > width ? el.width() : left;
+
+                        el.css({
+                            left: left
+                        });
+                    }
+                }else{clearInterval(scroll_text)}
+            }; 
+        });
+    };
+</script>
+</body>
+</html>
